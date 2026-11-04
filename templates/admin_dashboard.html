@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard | RELY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+  </head>
+  <body class="dashboard-page admin-dashboard">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-row brand-side">
+          <div class="brand-logo">R</div>
+          <div>
+            <div class="brand-name">RELY</div>
+            <small>Admin Console</small>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <a class="nav-item active" href="{{ url_for('admin_dashboard') }}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+          <a class="nav-item" href="{{ url_for('reports_page') }}"><i class="fa-solid fa-file-lines"></i> Reports</a>
+          <a class="nav-item" href="{{ url_for('logout') }}" data-confirm="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </nav>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar-panel admin-topbar">
+          <div>
+            <p class="eyebrow">Operations command center</p>
+            <h1>Admin dashboard</h1>
+          </div>
+          <div class="header-actions">
+            <a href="{{ url_for('reports_page') }}" class="secondary-btn"><i class="fa-solid fa-download"></i> Reports</a>
+            <a href="{{ url_for('logout') }}" class="primary-btn" data-confirm="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+          </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="toast-stack">
+              {% for category, message in messages %}
+                <div class="toast toast-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <section class="stats-grid admin-stats">
+          <article class="stat-card warm">
+            <div class="card-icon"><i class="fa-solid fa-users"></i></div>
+            <div><span>Total registered partners</span><strong>{{ stats.registered_partners }}</strong></div>
+          </article>
+          <article class="stat-card terracotta">
+            <div class="card-icon"><i class="fa-solid fa-user-check"></i></div>
+            <div><span>Active partners</span><strong>{{ stats.active_partners }}</strong></div>
+          </article>
+          <article class="stat-card gold">
+            <div class="card-icon"><i class="fa-solid fa-clock"></i></div>
+            <div><span>Today's present</span><strong>{{ stats.today_present }}</strong></div>
+          </article>
+          <article class="stat-card dark">
+            <div class="card-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+            <div><span>Today's pickups</span><strong>{{ stats.today_pickups }}</strong></div>
+          </article>
+          <article class="stat-card">
+            <div class="card-icon"><i class="fa-solid fa-truck-fast"></i></div>
+            <div><span>Completed deliveries</span><strong>{{ stats.today_completed }}</strong></div>
+          </article>
+          <article class="stat-card">
+            <div class="card-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+            <div><span>Today's earnings</span><strong>₹{{ '%.2f'|format(stats.today_earnings) }}</strong></div>
+          </article>
+          <article class="stat-card accent">
+            <div class="card-icon"><i class="fa-solid fa-wallet"></i></div>
+            <div><span>Overall earnings</span><strong>₹{{ '%.2f'|format(stats.overall_earnings) }}</strong></div>
+          </article>
+        </section>
+
+        <section class="chart-grid">
+          <div class="content-panel chart-panel">
+            <div class="panel-header">
+              <h3>Daily completed deliveries</h3>
+              <span class="badge tertiary">Last 7 days</span>
+            </div>
+            <canvas id="dailyDeliveriesChart"></canvas>
+          </div>
+          <div class="content-panel chart-panel">
+            <div class="panel-header">
+              <h3>Weekly delivery performance</h3>
+              <span class="badge primary">Bar view</span>
+            </div>
+            <canvas id="weeklyDeliveryChart"></canvas>
+          </div>
+          <div class="content-panel chart-panel">
+            <div class="panel-header">
+              <h3>Monthly earnings</h3>
+              <span class="badge tertiary">Trend</span>
+            </div>
+            <canvas id="monthlyEarningsChart"></canvas>
+          </div>
+          <div class="content-panel chart-panel">
+            <div class="panel-header">
+              <h3>Partner attendance</h3>
+              <span class="badge secondary">Live</span>
+            </div>
+            <canvas id="attendanceChart"></canvas>
+          </div>
+          <div class="content-panel chart-panel wide-panel">
+            <div class="panel-header">
+              <h3>Pickup vs completed deliveries</h3>
+              <span class="badge primary">Comparison</span>
+            </div>
+            <canvas id="comparisonChart"></canvas>
+          </div>
+        </section>
+
+        <section class="panel-grid single-col">
+          <div class="content-panel">
+            <div class="panel-header">
+              <h3>Registered partners</h3>
+              <form method="GET" action="{{ url_for('admin_partners') }}" class="search-form">
+                <input type="text" name="q" placeholder="Search by name or email" value="{{ query or '' }}" />
+                <button type="submit" class="secondary-btn small-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
+              </form>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Partner</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for partner in partners %}
+                    <tr>
+                      <td>{{ partner.full_name }}</td>
+                      <td>{{ partner.email }}</td>
+                      <td>{{ partner.phone }}</td>
+                      <td>
+                        {% if partner.is_active %}
+                          <span class="status-pill success">Active</span>
+                        {% else %}
+                          <span class="status-pill muted">Inactive</span>
+                        {% endif %}
+                      </td>
+                      <td class="row-actions">
+                        <a class="table-link" href="{{ url_for('partner_profile_admin', partner_id=partner.id) }}">View</a>
+                        <form method="POST" action="{{ url_for('toggle_partner_status', partner_id=partner.id) }}">
+                          {{ csrf_token() }}
+                          <button type="submit" class="table-button">{{ 'Deactivate' if partner.is_active else 'Activate' }}</button>
+                        </form>
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="5" class="empty-state">No partners found.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      window.chartData = {{ chart_data | tojson }};
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  </body>
+</html>

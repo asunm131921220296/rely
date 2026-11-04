@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delivery Records | RELY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+  </head>
+  <body class="dashboard-page">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-row brand-side">
+          <div class="brand-logo">R</div>
+          <div>
+            <div class="brand-name">RELY</div>
+            <small>Partner Console</small>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <a class="nav-item" href="{{ url_for('partner_dashboard') }}"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+          <a class="nav-item" href="{{ url_for('attendance_page') }}"><i class="fa-solid fa-clock"></i> Attendance</a>
+          <a class="nav-item active" href="{{ url_for('delivery_records') }}"><i class="fa-solid fa-box-open"></i> Delivery Records</a>
+          <a class="nav-item" href="{{ url_for('profile_page') }}"><i class="fa-solid fa-user"></i> Profile</a>
+          <a class="nav-item" href="{{ url_for('logout') }}" data-confirm="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </nav>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar-panel">
+          <div>
+            <p class="eyebrow">Daily operations</p>
+            <h1>Delivery records</h1>
+          </div>
+          <div class="user-badge">
+            {% if partner.profile_photo %}
+              <img src="{{ url_for('static', filename=partner.profile_photo) }}" alt="{{ partner.full_name }}" />
+            {% else %}
+              <div class="user-fallback">{{ partner.full_name[:1].upper() }}</div>
+            {% endif %}
+            <div>
+              <strong>{{ partner.full_name }}</strong>
+              <span>{{ partner.email }}</span>
+            </div>
+          </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="toast-stack">
+              {% for category, message in messages %}
+                <div class="toast toast-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <section class="panel-grid two-col">
+          <div class="content-panel">
+            <div class="panel-header">
+              <h3>Add daily delivery summary</h3>
+              <span class="badge primary">₹15 per delivery + ₹15 per return</span>
+            </div>
+            <form method="POST" class="stack-form">
+              {{ csrf_token() }}
+              <div class="grid-two">
+                <div class="input-group">
+                  <label for="record_date">Date</label>
+                  <input type="date" id="record_date" name="record_date" value="{{ default_date }}" required />
+                </div>
+                <div class="input-group">
+                  <label for="pickups">Number of pickups</label>
+                  <input type="number" id="pickups" name="pickups" min="0" value="0" required />
+                </div>
+              </div>
+
+              <div class="grid-two">
+                <div class="input-group">
+                  <label for="completed_deliveries">Completed deliveries</label>
+                  <input type="number" id="completed_deliveries" name="completed_deliveries" min="0" value="0" required />
+                </div>
+                <div class="input-group">
+                  <label for="returns">Returns handled</label>
+                  <input type="number" id="returns" name="returns" min="0" value="0" required />
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label>Daily earnings</label>
+                <div class="metric-box">₹0.00</div>
+              </div>
+
+              <div class="input-group">
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" rows="4" placeholder="Optional route, issue, or delivery notes"></textarea>
+              </div>
+
+              <button type="submit" class="primary-btn"><i class="fa-solid fa-floppy-disk"></i> Save record</button>
+            </form>
+          </div>
+
+          <div class="content-panel">
+            <div class="panel-header">
+              <h3>Previous records</h3>
+              <span class="badge tertiary">History</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Pickups</th>
+                    <th>Completed</th>
+                    <th>Returns</th>
+                    <th>Earnings</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for record in records %}
+                    <tr>
+                      <td>{{ record.record_date }}</td>
+                      <td>{{ record.pickups }}</td>
+                      <td>{{ record.completed_deliveries }}</td>
+                      <td>{{ record.returns or 0 }}</td>
+                      <td>₹{{ '%.2f'|format(record.earnings) }}</td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="5" class="empty-state">No delivery records yet.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  </body>
+</html>

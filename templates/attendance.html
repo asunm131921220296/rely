@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attendance | RELY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+  </head>
+  <body class="dashboard-page">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-row brand-side">
+          <div class="brand-logo">R</div>
+          <div>
+            <div class="brand-name">RELY</div>
+            <small>Partner Console</small>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <a class="nav-item" href="{{ url_for('partner_dashboard') }}"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+          <a class="nav-item active" href="{{ url_for('attendance_page') }}"><i class="fa-solid fa-clock"></i> Attendance</a>
+          <a class="nav-item" href="{{ url_for('delivery_records') }}"><i class="fa-solid fa-box-open"></i> Delivery Records</a>
+          <a class="nav-item" href="{{ url_for('profile_page') }}"><i class="fa-solid fa-user"></i> Profile</a>
+          <a class="nav-item" href="{{ url_for('logout') }}" data-confirm="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </nav>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar-panel">
+          <div>
+            <p class="eyebrow">Partner activity</p>
+            <h1>Attendance tracker</h1>
+          </div>
+          <div class="user-badge">
+            {% if partner.profile_photo %}
+              <img src="{{ url_for('static', filename=partner.profile_photo) }}" alt="{{ partner.full_name }}" />
+            {% else %}
+              <div class="user-fallback">{{ partner.full_name[:1].upper() }}</div>
+            {% endif %}
+            <div>
+              <strong>{{ partner.full_name }}</strong>
+              <span>{{ partner.email }}</span>
+            </div>
+          </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="toast-stack">
+              {% for category, message in messages %}
+                <div class="toast toast-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <section class="panel-grid single-col">
+          <div class="content-panel">
+            <div class="panel-header">
+              <h3>Record attendance</h3>
+              <span class="badge primary">Secure check-in</span>
+            </div>
+            <div class="quick-actions compact-actions">
+              <form method="POST">
+                {{ csrf_token() }}
+                <input type="hidden" name="action" value="check_in" />
+                <button type="submit" class="primary-btn"><i class="fa-solid fa-door-open"></i> Check In</button>
+              </form>
+              <form method="POST">
+                {{ csrf_token() }}
+                <input type="hidden" name="action" value="check_out" />
+                <button type="submit" class="secondary-btn"><i class="fa-solid fa-door-closed"></i> Check Out</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="content-panel">
+            <div class="panel-header">
+              <h3>Attendance history</h3>
+              <span class="badge tertiary">Last 30 days</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for record in attendance_rows %}
+                    <tr>
+                      <td>{{ record.attendance_date }}</td>
+                      <td>{{ record.check_in_time or '--' }}</td>
+                      <td>{{ record.check_out_time or '--' }}</td>
+                      <td>
+                        {% if record.check_out_time %}
+                          <span class="status-pill success">Closed</span>
+                        {% elif record.check_in_time %}
+                          <span class="status-pill warning">In shift</span>
+                        {% else %}
+                          <span class="status-pill muted">Pending</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="4" class="empty-state">No attendance history available.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  </body>
+</html>

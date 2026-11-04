@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reports | RELY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+  </head>
+  <body class="dashboard-page admin-dashboard">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-row brand-side">
+          <div class="brand-logo">R</div>
+          <div>
+            <div class="brand-name">RELY</div>
+            <small>Admin Console</small>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <a class="nav-item" href="{{ url_for('admin_dashboard') }}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+          <a class="nav-item active" href="{{ url_for('reports_page') }}"><i class="fa-solid fa-file-lines"></i> Reports</a>
+          <a class="nav-item" href="{{ url_for('logout') }}" data-confirm="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </nav>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar-panel">
+          <div>
+            <p class="eyebrow">Insights and exports</p>
+            <h1>Operational reports</h1>
+          </div>
+          <div class="header-actions">
+            <a href="{{ url_for('export_report', period=period) }}" class="primary-btn"><i class="fa-solid fa-download"></i> Export CSV</a>
+          </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="toast-stack">
+              {% for category, message in messages %}
+                <div class="toast toast-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <section class="panel-grid single-col">
+          <div class="content-panel">
+            <div class="panel-header">
+              <h3>Filter and export</h3>
+            </div>
+            <form method="GET" class="filter-row">
+              <select name="period">
+                <option value="7d" {% if period == '7d' %}selected{% endif %}>Last 7 days</option>
+                <option value="30d" {% if period == '30d' %}selected{% endif %}>Last 30 days</option>
+                <option value="all" {% if period == 'all' %}selected{% endif %}>All time</option>
+              </select>
+              <select name="partner_id">
+                <option value="">All partners</option>
+                {% for partner in partners %}
+                  <option value="{{ partner.id }}" {% if selected_partner_id and partner.id == selected_partner_id|int %}selected{% endif %}>{{ partner.full_name }}</option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="secondary-btn">Apply</button>
+            </form>
+          </div>
+        </section>
+
+        <section class="panel-grid single-col">
+          <div class="content-panel">
+            <div class="panel-header">
+              <h3>Report results</h3>
+              <span class="badge primary">Performance data</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Partner ID</th>
+                    <th>Pickups</th>
+                    <th>Completed</th>
+                    <th>Returns</th>
+                    <th>Earnings</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in records %}
+                    <tr>
+                      <td>{{ row.date }}</td>
+                      <td>{{ row.partner_id }}</td>
+                      <td>{{ row.pickups }}</td>
+                      <td>{{ row.completed }}</td>
+                      <td>{{ row.returns or 0 }}</td>
+                      <td>₹{{ '%.2f'|format(row.earnings) }}</td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="6" class="empty-state">No report data available.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  </body>
+</html>

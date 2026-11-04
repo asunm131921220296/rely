@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Login | RELY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body class="auth-page admin-auth-page">
+    <div class="auth-shell">
+      <div class="auth-card admin-card">
+        <div class="brand-row">
+          <div class="brand-logo">R</div>
+          <div>
+            <div class="brand-name">RELY</div>
+            <small>Admin Access</small>
+          </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="toast-stack">
+              {% for category, message in messages %}
+                <div class="toast toast-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <h2>Admin portal</h2>
+        <p class="subtitle">Monitor performance, attendance, and partner operations in real time.</p>
+
+        <form method="POST" class="auth-form">
+          {{ csrf_token() }}
+          <div class="input-group">
+            <label for="email">Admin email</label>
+            <input type="email" id="email" name="email" placeholder="admin@rely.com" required />
+          </div>
+
+          <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter admin password" required />
+          </div>
+
+          <button type="submit" class="primary-btn full-width">Login as admin</button>
+        </form>
+
+        <div class="auth-footer">
+          <a href="{{ url_for('index') }}" class="link-text">Return to home</a>
+        </div>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>

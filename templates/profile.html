@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile | RELY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+  </head>
+  <body class="dashboard-page">
+    <div class="app-shell">
+      {% if not admin_view %}
+      <aside class="sidebar">
+        <div class="brand-row brand-side">
+          <div class="brand-logo">R</div>
+          <div>
+            <div class="brand-name">RELY</div>
+            <small>Partner Console</small>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <a class="nav-item" href="{{ url_for('partner_dashboard') }}"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+          <a class="nav-item" href="{{ url_for('attendance_page') }}"><i class="fa-solid fa-clock"></i> Attendance</a>
+          <a class="nav-item" href="{{ url_for('delivery_records') }}"><i class="fa-solid fa-box-open"></i> Delivery Records</a>
+          <a class="nav-item active" href="{{ url_for('profile_page') }}"><i class="fa-solid fa-user"></i> Profile</a>
+          <a class="nav-item" href="{{ url_for('logout') }}" data-confirm="logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        </nav>
+      </aside>
+      {% endif %}
+
+      <main class="main-panel">
+        <header class="topbar-panel">
+          <div>
+            <p class="eyebrow">Account settings</p>
+            <h1>{% if admin_view %}Partner profile{% else %}My profile{% endif %}</h1>
+          </div>
+          {% if not admin_view %}
+          <div class="user-badge">
+            {% if partner.profile_photo %}
+              <img src="{{ url_for('static', filename=partner.profile_photo) }}" alt="{{ partner.full_name }}" />
+            {% else %}
+              <div class="user-fallback">{{ partner.full_name[:1].upper() }}</div>
+            {% endif %}
+            <div>
+              <strong>{{ partner.full_name }}</strong>
+              <span>{{ partner.email }}</span>
+            </div>
+          </div>
+          {% endif %}
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="toast-stack">
+              {% for category, message in messages %}
+                <div class="toast toast-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <section class="panel-grid two-col">
+          <div class="content-panel">
+            <div class="panel-header">
+              <h3>{% if admin_view %}Account details{% else %}Update profile{% endif %}</h3>
+              <span class="badge {% if admin_view %}tertiary{% else %}primary{% endif %}">{% if admin_view %}Read-only{% else %}Editable{% endif %}</span>
+            </div>
+
+            {% if admin_view %}
+              <div class="info-stack">
+                <div class="info-row"><span>Full name</span><strong>{{ partner.full_name }}</strong></div>
+                <div class="info-row"><span>Email address</span><strong>{{ partner.email }}</strong></div>
+                <div class="info-row"><span>Phone number</span><strong>{{ partner.phone }}</strong></div>
+                <div class="info-row"><span>Address</span><strong>{{ partner.address }}</strong></div>
+                <div class="info-row"><span>Status</span><strong>{{ 'Active' if partner.is_active else 'Inactive' }}</strong></div>
+              </div>
+            {% else %}
+              <form method="POST" enctype="multipart/form-data" class="stack-form">
+                {{ csrf_token() }}
+                <div class="grid-two">
+                  <div class="input-group">
+                    <label for="full_name">Full name</label>
+                    <input type="text" id="full_name" name="full_name" value="{{ partner.full_name }}" required />
+                  </div>
+                  <div class="input-group">
+                    <label for="phone">Phone number</label>
+                    <input type="tel" id="phone" name="phone" value="{{ partner.phone }}" required />
+                  </div>
+                </div>
+
+                <div class="input-group">
+                  <label for="address">Address</label>
+                  <textarea id="address" name="address" rows="4" required>{{ partner.address }}</textarea>
+                </div>
+
+                <div class="grid-two">
+                  <div class="input-group">
+                    <label for="password">New password (optional)</label>
+                    <input type="password" id="password" name="password" placeholder="Leave blank to keep current password" />
+                  </div>
+                  <div class="input-group">
+                    <label for="confirm_password">Confirm new password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter password" />
+                  </div>
+                </div>
+
+                <div class="input-group">
+                  <label for="profile_photo">Profile photo</label>
+                  <input type="file" id="profile_photo" name="profile_photo" accept="image/png,image/jpg,image/jpeg,image/webp" />
+                </div>
+
+                <button type="submit" class="primary-btn"><i class="fa-solid fa-user-pen"></i> Save profile</button>
+              </form>
+            {% endif %}
+          </div>
+
+          {% if admin_view %}
+          <div class="content-panel">
+            <div class="panel-header">
+              <h3>Attendance history</h3>
+              <span class="badge secondary">Partner timeline</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Date</th><th>Check-in</th><th>Check-out</th></tr>
+                </thead>
+                <tbody>
+                  {% for row in attendance_rows %}
+                    <tr><td>{{ row.attendance_date }}</td><td>{{ row.check_in_time or '--' }}</td><td>{{ row.check_out_time or '--' }}</td></tr>
+                  {% else %}
+                    <tr><td colspan="3" class="empty-state">No attendance records.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {% endif %}
+        </section>
+
+        {% if admin_view and records %}
+        <section class="panel-grid single-col">
+          <div class="content-panel">
+            <div class="panel-header">
+              <h3>Delivery records</h3>
+              <span class="badge primary">Partner earnings</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Date</th><th>Pickups</th><th>Completed</th><th>Returns</th><th>Earnings</th></tr>
+                </thead>
+                <tbody>
+                  {% for record in records %}
+                    <tr>
+                      <td>{{ record.record_date }}</td>
+                      <td>{{ record.pickups }}</td>
+                      <td>{{ record.completed_deliveries }}</td>
+                      <td>{{ record.returns or 0 }}</td>
+                      <td>₹{{ '%.2f'|format(record.earnings) }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+        {% endif %}
+      </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  </body>
+</html>

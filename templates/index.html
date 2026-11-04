@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RELY | Delivery Partner Management System</title>
+    <meta name="description" content="RELY helps delivery teams manage attendance, performance, and earnings with clarity." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body class="landing-page">
+    <div class="page-shell">
+      <header class="topbar">
+        <div class="brand-wrap">
+          <div class="brand-logo">R</div>
+          <div>
+            <div class="brand-name">RELY</div>
+            <small>Delivery Partner Management</small>
+          </div>
+        </div>
+        <nav>
+          <a href="{{ url_for('partner_login') }}">Partner Login</a>
+          <a href="{{ url_for('admin_login') }}">Admin Login</a>
+        </nav>
+      </header>
+
+      <main class="hero-section">
+        <div class="hero-copy">
+          <span class="eyebrow">Every Delivery. Every Detail. Under Control.</span>
+          <h1>Deliver smarter with a complete partner operations dashboard.</h1>
+          <p>
+            RELY centralizes attendance, daily delivery records, earnings tracking,
+            and operational insights for every delivery partner.
+          </p>
+          <div class="cta-row">
+            <a class="primary-btn" href="{{ url_for('partner_login') }}">Partner Login</a>
+            <a class="secondary-btn" href="{{ url_for('partner_signup') }}">Create Account</a>
+          </div>
+          <ul class="feature-pills">
+            <li>Live attendance</li>
+            <li>Instant earnings</li>
+            <li>Admin reporting</li>
+          </ul>
+        </div>
+
+        <div class="hero-panel card-glass">
+          <div class="panel-head">
+            <span class="status-dot"></span>
+            <span>Operations overview</span>
+          </div>
+          <div class="mini-stat-grid">
+            <div class="mini-card">
+              <strong>248</strong>
+              <span>Partners</span>
+            </div>
+            <div class="mini-card accent">
+              <strong>94%</strong>
+              <span>On-time</span>
+            </div>
+            <div class="mini-card">
+              <strong>₹42.8K</strong>
+              <span>Monthly earnings</span>
+            </div>
+          </div>
+          <div class="kpi-panel">
+            <div class="kpi-row">
+              <span>Today's pickups</span>
+              <strong>1,286</strong>
+            </div>
+            <div class="kpi-row">
+              <span>Completed deliveries</span>
+              <strong>942</strong>
+            </div>
+            <div class="kpi-row">
+              <span>Present partners</span>
+              <strong>186</strong>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>
